@@ -2,10 +2,10 @@
 python-s3-backup-client is a python app to backup and restore files to/from an s3 bucket with optional client side encryption.  Backup mode will backup files from a local machine to a s3 target.  Restore mode will copy the data from s3 to a designated restore directory on the local machine.
 
 ## dependencies
-pyinstaller
-minio
-pyaescrypt
-configparser
+* pyinstaller
+* minio
+* pyaescrypt
+* configparser
 
 ## S3 Implementation
 Uses Minio python API for S3 connectivity.
