@@ -9,7 +9,6 @@ from minio.error import ResponseError   # for minio exceptions
 import timeit                           # for timing program runtime
 
 import logging
-import filenames                        # utility class for filenames
 
 import backup_util
 from multiprocessing import Queue
@@ -22,14 +21,14 @@ warnings.simplefilter('ignore', urllib3.exceptions.SecurityWarning)
 # start timer
 start = timeit.default_timer()
 
-if not os.path.exists(".\\logs"):
-    os.makedirs(".\\logs")
+if not os.path.exists("./logs"):
+    os.makedirs("./logs")
 
 # setup a logger
 logger = logging.getLogger()
 logger.setLevel(logging.INFO)
 formatter = logging.Formatter('%(asctime)s - %(name)s - %(levelname)s - %(message)s')
-fh = logging.FileHandler('.\\logs\\restore.log')
+fh = logging.FileHandler('./logs/restore.log')
 fh.setLevel(logging.INFO)
 fh.setFormatter(formatter)
 ch = logging.StreamHandler()
