@@ -1,0 +1,5 @@
+.venv*
+.vscode*
+*.exe
+src/__pycache__/backup_util.cpython-38.pyc
+logs/backup_client.log
