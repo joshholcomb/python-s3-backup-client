@@ -89,7 +89,8 @@ def doBackup(inputDir, folder, q, config, logger, useQ, doEncrypt):
     delete_time = round(delete_stop - delete_start, 2)
     msg = "s3 folder cleanup time: [{}s]".format(str(delete_time))
     logger.info(msg)
-    q.put(msg)
+    if (useQ):
+        q.put(msg)
 
 
     #
