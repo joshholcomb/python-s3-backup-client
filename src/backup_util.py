@@ -47,11 +47,11 @@ def doBackup(inputDir, folder, q, config, logger, useQ, doEncrypt):
         encrypt = "false"
 
     # connect to s3
-    s3Host = config['s3']['s3.server']
-    s3Access = config['s3']['s3.access_key']
-    s3Secret = config['s3']['s3.secret_key']
-    s3SslCert = config['s3']['s3.ssl_cacert']
-    s3Bkt = config['s3']['s3.bucket_name']
+    s3Host = config['S3']['s3.server']
+    s3Access = config['S3']['s3.access_key']
+    s3Secret = config['S3']['s3.secret_key']
+    s3SslCert = config['S3']['s3.ssl_cacert']
+    s3Bkt = config['S3']['s3.bucket_name']
     os.environ['SSL_CERT_FILE'] = s3SslCert
     logger.info("connecting to s3 server: [{}] - access_key: [{}]".format(s3Host, s3Access))
 
@@ -195,11 +195,11 @@ def doRestore(restoreDir, folder, q, config, logger, useQ):
     fileEncryptionPass = config['DEFAULT']['file.encryption_password']
 
     # connect to s3
-    s3Host = config['s3']['s3.server']
-    s3Access = config['s3']['s3.access_key']
-    s3Secret = config['s3']['s3.secret_key']
-    s3SslCert = config['s3']['s3.ssl_cacert']
-    s3Bkt = config['s3']['s3.bucket_name']
+    s3Host = config['S3']['s3.server']
+    s3Access = config['S3']['s3.access_key']
+    s3Secret = config['S3']['s3.secret_key']
+    s3SslCert = config['S3']['s3.ssl_cacert']
+    s3Bkt = config['S3']['s3.bucket_name']
     os.environ['SSL_CERT_FILE'] = s3SslCert
     logger.info("connecting to s3 server: [{}] - access_key: [{}] - secret: [{}]".format(s3Host, s3Access, s3Secret))
 
