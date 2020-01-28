@@ -14,6 +14,9 @@ import sys
 
 stopFlag = False
 
+#
+# utility function to set s3 folder name
+#
 def genS3Name(x):
     minioName = x
 
@@ -26,7 +29,9 @@ def genS3Name(x):
     return minioName
 
 
-
+#
+# function to perform a backup job
+#
 def doBackup(inputDir, folder, q, config, logger, useQ, doEncrypt):
     # suppress s3 warnings
     warnings.simplefilter('ignore', urllib3.exceptions.SecurityWarning)
@@ -174,7 +179,9 @@ def doBackup(inputDir, folder, q, config, logger, useQ, doEncrypt):
 
 
 
-
+#
+# function to perform a restore job
+#
 def doRestore(restoreDir, folder, q, config, logger, useQ):
     # make sure the restore directory exists
     if not os.path.exists(restoreDir):
