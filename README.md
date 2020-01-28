@@ -23,4 +23,5 @@ Build standalone executables from the python scripts for easy deployment to targ
 |backup.py|For a command line backup client|`pyinstaller --onefile backup.py`|
 |restore.py|For a command line restore utility|`pyinstaller --onefile restore.py`|
 
-
+## config
+Site level configuration is performed in config/bkup.conf
