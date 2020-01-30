@@ -81,7 +81,8 @@ if (encrypt == "true"):
 
 # don't need the multiprocessing queue for command line
 useQ = False
-backup_util.doBackup(inputDir, folder, q, config, logger, useQ, encrypt)
+bucket = ""
+backup_util.doBackup(inputDir, folder, q, config, logger, useQ, encrypt, bucket)
 
 
 

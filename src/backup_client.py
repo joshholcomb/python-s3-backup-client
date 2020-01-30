@@ -1,6 +1,6 @@
 from tkinter import (Tk, BOTH, Text, E, W, S, N, END, 
-    NORMAL, DISABLED, StringVar, IntVar)
-from tkinter.ttk import Frame, Label, Button, Progressbar, Entry, Radiobutton, Checkbutton
+    NORMAL, DISABLED, StringVar, IntVar, HORIZONTAL, VERTICAL)
+from tkinter.ttk import Frame, Label, Button, Progressbar, Entry, Radiobutton, Checkbutton, OptionMenu, Separator
 from tkinter import scrolledtext
 from tkinter import filedialog
 from tkinter import messagebox
@@ -29,14 +29,14 @@ if (len(found) == 0):
     print("could not load config.")
     sys.exit(1)
 
-if not os.path.exists(".\\logs"):
-        os.makedirs(".\\logs")
+if not os.path.exists("./logs"):
+        os.makedirs("./logs")
 
  # setup a logger
 logger = logging.getLogger()
 logger.setLevel(logging.INFO)
 formatter = logging.Formatter('%(asctime)s - %(name)s - %(levelname)s - %(message)s')
-fh = logging.FileHandler('.\\logs\\backup_client.log')
+fh = logging.FileHandler('./logs/backup_client.log')
 fh.setLevel(logging.INFO)
 fh.setFormatter(formatter)
 ch = logging.StreamHandler()
@@ -66,16 +66,14 @@ class GUI(Frame):
         self.pack(fill=BOTH, expand=True)
 
         self.grid_columnconfigure(6, weight=1)
-        self.grid_rowconfigure(7, weight=1)
+        self.grid_rowconfigure(9, weight=1)
         
         # display config info
         f1 = Frame(self)
         lblConfig = Label(f1, text="Config Settings:")
         txtConfig = Text(f1, height=4, width=40)
         s3Host = config['S3']['s3.server']
-        bkt = config['S3']['s3.bucket_name']
         msg = "s3.server: " + s3Host
-        msg = msg + "\n" + "s3.bucket_name: " + bkt
         txtConfig.insert('end', msg)
         txtConfig.configure(state='disabled')
         f1.grid(row=0, column=0, sticky="nsew")
@@ -103,23 +101,52 @@ class GUI(Frame):
         self.rbBackup.pack(side="left")
         self.rbRestore.pack(side="left")
         
+
+        sp1 = Separator(self, orient=HORIZONTAL)
+        sp1.grid(row=3, column=0, columnspan=5, sticky='ew', padx=10, pady=20)
+
         # inputDir entry with FileDialog
         f2 = Frame(self)
-        self.lbl1 = Label(f2, text="Backup Directory:")
+        lblSrc = Label(f2, text="SOURCE INFO")
+        self.lbl1 = Label(f2, text="Src Directory:")
         self.ent1 = Entry(f2, width=40)
         b1 = Button(f2, text="Browse", width=8, command=self.getFilePath)
-        f2.grid(row=3, column=0, sticky=W, padx=10, pady=10)
+        f2.grid(row=4, column=0, sticky=W, padx=10, pady=10)
+        lblSrc.pack(side="top")
         self.lbl1.pack(side="top", anchor=W)
         self.ent1.pack(side="left", anchor=W)
         b1.pack(side="left", anchor=E)
         
+        # vertical separator
+        sp3 = Separator(self, orient=VERTICAL)
+        sp3.grid(row=4, column=1, sticky='ns', padx=20, pady=10, rowspan=2)
+
+        # s3 bucket selection
+        fBucket = Frame(self)
+        lblTgt = Label(fBucket, text="TARGET INFO")
+        lblBucket = Label(fBucket, text="S3 bucket:")
+        buckets = backup_util.getBucketList(config)
+        options = list()
+        self.selectedBucket = StringVar(fBucket)
+        for bucket in buckets:
+            options.append(bucket.name)
+        self.bucketMenu = OptionMenu(fBucket, self.selectedBucket, *options)
+        self.bucketMenu.config(width=30)
+        fBucket.grid(row=4, column=2, sticky=W, padx=10, pady=10)
+        lblTgt.pack(side="top")
+        lblBucket.pack(side="top", anchor=W)
+        self.bucketMenu.pack(side="top")
+
         # s3 folder entry
         f3 = Frame(self)
-        lblFolder = Label(f3, text="Target S3 Folder:")
+        lblFolder = Label(f3, text="S3 Folder:")
         self.ent2 = Entry(f3, width=20)
-        f3.grid(row=4, column=0, sticky=W, padx=10)
+        f3.grid(row=5, column=2, sticky=W, padx=10)
         lblFolder.pack(side="top", anchor=W)
         self.ent2.pack(side="top", anchor=W)
+
+        sp2 = Separator(self, orient=HORIZONTAL)
+        sp2.grid(row=6, column=0, columnspan=5, sticky='ew', padx=10, pady=20)
 
         # buttons (backup/stop/reset/restore)
         fButtons = Frame(self)
@@ -127,7 +154,7 @@ class GUI(Frame):
         self.restoreBtn = Button(fButtons, text="Restore", command=self.onRestore)
         self.stopBtn = Button(fButtons, text="Stop", command=self.onStop)
         self.resetBtn = Button(fButtons, text="Reset", command=self.onResetBtn)
-        fButtons.grid(row=5, column=0, sticky=W, padx=10, pady=10)
+        fButtons.grid(row=7, column=0, sticky=W, padx=10, pady=10)
         self.backupBtn.pack(side="left")
         self.restoreBtn.pack(side="left")
         self.restoreBtn.config(state=DISABLED)
@@ -136,7 +163,7 @@ class GUI(Frame):
 
         # progress bar
         self.pbar = Progressbar(self, mode='indeterminate')        
-        self.pbar.grid(row=5, column=1, columnspan=1, sticky=W+E)   
+        self.pbar.grid(row=7, column=1, columnspan=1, sticky=W+E)   
 
         # a couple of checkbox items
         fchkbox = Frame(self)
@@ -148,14 +175,14 @@ class GUI(Frame):
         self.chkboxEncrypt = Checkbutton(fchkbox, text="encrypt data",
             variable=self.doEncrypt, command=self.onCheckEncrypt)
 
-        fchkbox.grid(row=5, column=2, sticky=W, padx=10)
+        fchkbox.grid(row=7, column=2, sticky=W, padx=10)
         self.chkboxQuitOnEnd.pack(side="top", anchor="w")
         self.chkboxEncrypt.pack(side="top", anchor="w")
 
         # scrolled txt
         f4 = Frame(self)
         f4.grid_columnconfigure(1, weight=1)
-        f4.grid(row=6, column=0, columnspan=7, rowspan=5, padx=10, pady=10, sticky=(N, E, S, W))
+        f4.grid(row=8, column=0, columnspan=7, rowspan=5, padx=10, pady=10, sticky=(N, E, S, W))
         lblStatus = Label(f4, text="//Job Status//")
         self.txt = scrolledtext.ScrolledText(f4)
         lblStatus.pack(side="top")
@@ -208,7 +235,8 @@ class GUI(Frame):
                     config, 
                     logger, 
                     useQ, 
-                    self.doEncrypt.get())
+                    self.doEncrypt.get(),
+                    self.selectedBucket.get())
         self.t.start()
         
         # start progress bar
@@ -243,7 +271,7 @@ class GUI(Frame):
         self.txt.delete("1.0", END)
         
         useQ = True
-        self.t = ThreadedRestoreTask(inputDir, folder, q, config, logger, useQ)
+        self.t = ThreadedRestoreTask(inputDir, folder, q, config, logger, useQ, self.selectedBucket.get())
         self.t.start()
     
         # start progress bar & look for values
@@ -306,7 +334,7 @@ class GUI(Frame):
 # class for backup task
 #
 class ThreadedBackupTask(threading.Thread):
-    def __init__(self, inputDir, folder, q, config, logger, useQ, doEncrypt):
+    def __init__(self, inputDir, folder, q, config, logger, useQ, doEncrypt, bucket):
         threading.Thread.__init__(self)
         self.inputDir = inputDir
         self.folder = folder
@@ -315,16 +343,17 @@ class ThreadedBackupTask(threading.Thread):
         self.logger = logger
         self.useQ = useQ
         self.doEncrypt = doEncrypt
+        self.bucket = bucket
 
     def run(self):
         backup_util.doBackup(self.inputDir, self.folder, 
-            self.q, self.config, self.logger, self.useQ, self.doEncrypt)
+            self.q, self.config, self.logger, self.useQ, self.doEncrypt, self.bucket)
 
 #
 # class for restore task
 #
 class ThreadedRestoreTask(threading.Thread):
-    def __init__(self, inputDir, folder, q, config, logger, useQ):
+    def __init__(self, inputDir, folder, q, config, logger, useQ, bucket):
         threading.Thread.__init__(self)
         self.inputDir = inputDir
         self.folder = folder
@@ -332,10 +361,11 @@ class ThreadedRestoreTask(threading.Thread):
         self.config = config
         self.logger = logger
         self.useQ = useQ
+        self.bucket = bucket
 
     def run(self):
         backup_util.doRestore(self.inputDir, self.folder, 
-            self.q, self.config, self.logger, self.useQ)
+            self.q, self.config, self.logger, self.useQ, self.bucket)
 
 
 def main():  

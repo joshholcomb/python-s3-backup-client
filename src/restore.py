@@ -96,7 +96,8 @@ for currentArgument, currentValue in arguments:
 
 q = Queue()
 useQ = False
-backup_util.doRestore(restoreDir, folder, q, config, logger, useQ)
+bucket = ""
+backup_util.doRestore(restoreDir, folder, q, config, logger, useQ, bucket)
 
 
     

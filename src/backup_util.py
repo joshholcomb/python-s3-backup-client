@@ -28,11 +28,33 @@ def genS3Name(x):
     minioName = minioName.replace("\\", "/")
     return minioName
 
+def connectToS3(config):
+    # connect to s3
+    s3Host = config['S3']['s3.server']
+    s3Access = config['S3']['s3.access_key']
+    s3Secret = config['S3']['s3.secret_key']
+    s3SslCert = config['S3']['s3.ssl_cacert']
+    os.environ['SSL_CERT_FILE'] = s3SslCert
+
+    s3Client = Minio(s3Host,
+                    access_key=s3Access,
+                    secret_key=s3Secret,
+                    secure=True)
+
+    return s3Client
+
+
+
+def getBucketList(config):
+    s3Client = connectToS3(config)
+    buckets = s3Client.list_buckets()
+    return buckets
+
 
 #
 # function to perform a backup job
 #
-def doBackup(inputDir, folder, q, config, logger, useQ, doEncrypt):
+def doBackup(inputDir, folder, q, config, logger, useQ, doEncrypt, bucket):
     # suppress s3 warnings
     warnings.simplefilter('ignore', urllib3.exceptions.SecurityWarning)
 
@@ -51,19 +73,14 @@ def doBackup(inputDir, folder, q, config, logger, useQ, doEncrypt):
     else:
         encrypt = "false"
 
-    # connect to s3
-    s3Host = config['S3']['s3.server']
-    s3Access = config['S3']['s3.access_key']
-    s3Secret = config['S3']['s3.secret_key']
-    s3SslCert = config['S3']['s3.ssl_cacert']
     s3Bkt = config['S3']['s3.bucket_name']
-    os.environ['SSL_CERT_FILE'] = s3SslCert
-    logger.info("connecting to s3 server: [{}] - access_key: [{}]".format(s3Host, s3Access))
 
-    s3Client = Minio(s3Host,
-                    access_key=s3Access,
-                    secret_key=s3Secret,
-                    secure=True)
+    # override s3Bkt if passed in from user
+    if (bucket != ""):
+        s3Bkt = bucket
+
+    # connect to s3
+    s3Client = connectToS3(config)
 
     # make sure we have all of the input we need
     if (inputDir == "" or folder == ""):
@@ -183,7 +200,7 @@ def doBackup(inputDir, folder, q, config, logger, useQ, doEncrypt):
 #
 # function to perform a restore job
 #
-def doRestore(restoreDir, folder, q, config, logger, useQ):
+def doRestore(restoreDir, folder, q, config, logger, useQ, bucket):
     # make sure the restore directory exists
     if not os.path.exists(restoreDir):
         logger.info("making directory: {}".format(restoreDir))
@@ -203,18 +220,15 @@ def doRestore(restoreDir, folder, q, config, logger, useQ):
     fileEncryptionPass = config['DEFAULT']['file.encryption_password']
 
     # connect to s3
-    s3Host = config['S3']['s3.server']
-    s3Access = config['S3']['s3.access_key']
-    s3Secret = config['S3']['s3.secret_key']
-    s3SslCert = config['S3']['s3.ssl_cacert']
-    s3Bkt = config['S3']['s3.bucket_name']
-    os.environ['SSL_CERT_FILE'] = s3SslCert
-    logger.info("connecting to s3 server: [{}] - access_key: [{}] - secret: [{}]".format(s3Host, s3Access, s3Secret))
+    s3Client = connectToS3(config)
 
-    s3Client = Minio(s3Host,
-                    access_key=s3Access,
-                    secret_key=s3Secret,
-                    secure=True)
+    # default s3 bucket (from config)    
+    s3Bkt = config['S3']['s3.bucket_name']
+    
+     # override s3Bkt if passed in from user
+    if (bucket != ""):
+        s3Bkt = bucket
+
 
     # list objects in bucket
     # write each object to a file
