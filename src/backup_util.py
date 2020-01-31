@@ -36,18 +36,31 @@ def connectToS3(config):
     s3SslCert = config['S3']['s3.ssl_cacert']
     os.environ['SSL_CERT_FILE'] = s3SslCert
 
-    s3Client = Minio(s3Host,
+    s3Client = ""
+    try:
+        s3Client = Minio(s3Host,
                     access_key=s3Access,
                     secret_key=s3Secret,
                     secure=True)
+    except ResponseError:
+        print("error connecting to s3 via minio api.")
 
     return s3Client
 
 
-
+#
+# get a list of buckets in a given account
+#
 def getBucketList(config):
+    buckets = list()
     s3Client = connectToS3(config)
-    buckets = s3Client.list_buckets()
+    try:
+        buckets = s3Client.list_buckets()
+    except ResponseError:
+        print("error listing buckets in s3")
+    except urllib3.exceptions.MaxRetryError:
+        print("max retry error listing buckets")
+
     return buckets
 
 

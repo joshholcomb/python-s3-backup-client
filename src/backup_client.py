@@ -126,6 +126,7 @@ class GUI(Frame):
         lblTgt = Label(fBucket, text="TARGET INFO")
         lblBucket = Label(fBucket, text="S3 bucket:")
         buckets = backup_util.getBucketList(config)
+        
         options = list()
         self.selectedBucket = StringVar(fBucket)
         for bucket in buckets:
@@ -188,6 +189,11 @@ class GUI(Frame):
         lblStatus.pack(side="top")
         self.txt.pack(side="top", fill=BOTH, expand=True)
        
+        # check to make sure we could list the buckets
+        if (len(buckets) == 0):
+            messagebox.showerror(title="bucket error", message="could not list buckets")
+
+
     def onCheckEncrypt(self):
         print("doEncrypt: [{}]".format(self.doEncrypt.get()))
 
