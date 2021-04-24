@@ -29,6 +29,7 @@ if (len(found) == 0):
     print("could not load config.")
     sys.exit(1)
 
+# create log directory
 if not os.path.exists("./logs"):
         os.makedirs("./logs")
 
@@ -68,12 +69,16 @@ class GUI(Frame):
         self.grid_columnconfigure(6, weight=1)
         self.grid_rowconfigure(9, weight=1)
         
-        # display config info
+        # display config info in txt box
         f1 = Frame(self)
         lblConfig = Label(f1, text="Config Settings:")
         txtConfig = Text(f1, height=4, width=40)
         s3Host = config['S3']['s3.server']
-        msg = "s3.server: " + s3Host
+        msg = "s3.server: " + s3Host + '\n'
+        encPass = config['DEFAULT']['file.encryption_password']
+        msg = msg + "encryption_pass: " + encPass + '\n'
+        s3AccessKey = config['S3']['s3.access_key']
+        msg = msg + "s3.access_key: " + s3AccessKey + '\n'
         txtConfig.insert('end', msg)
         txtConfig.configure(state='disabled')
         f1.grid(row=0, column=0, sticky="nsew")
@@ -101,9 +106,9 @@ class GUI(Frame):
         self.rbBackup.pack(side="left")
         self.rbRestore.pack(side="left")
         
-
+        # horizontal line on this row
         sp1 = Separator(self, orient=HORIZONTAL)
-        sp1.grid(row=3, column=0, columnspan=5, sticky='ew', padx=10, pady=20)
+        sp1.grid(row=3, column=0, columnspan=6, sticky='ew', padx=10, pady=20)
 
         # inputDir entry with FileDialog
         f2 = Frame(self)
@@ -141,13 +146,15 @@ class GUI(Frame):
         # s3 folder entry
         f3 = Frame(self)
         lblFolder = Label(f3, text="S3 Folder:")
-        self.ent2 = Entry(f3, width=20)
+        self.ent2 = Entry(f3, width=30)
         f3.grid(row=5, column=2, sticky=W, padx=10)
         lblFolder.pack(side="top", anchor=W)
         self.ent2.pack(side="top", anchor=W)
 
+
+        # horizontal line on this row
         sp2 = Separator(self, orient=HORIZONTAL)
-        sp2.grid(row=6, column=0, columnspan=5, sticky='ew', padx=10, pady=20)
+        sp2.grid(row=6, column=0, columnspan=6, sticky='ew', padx=10, pady=20)
 
         # buttons (backup/stop/reset/restore)
         fButtons = Frame(self)
@@ -155,12 +162,15 @@ class GUI(Frame):
         self.restoreBtn = Button(fButtons, text="Restore", command=self.onRestore)
         self.stopBtn = Button(fButtons, text="Stop", command=self.onStop)
         self.resetBtn = Button(fButtons, text="Reset", command=self.onResetBtn)
+        
         fButtons.grid(row=7, column=0, sticky=W, padx=10, pady=10)
         self.backupBtn.pack(side="left")
         self.restoreBtn.pack(side="left")
         self.restoreBtn.config(state=DISABLED)
         self.stopBtn.pack(side="left")
         self.resetBtn.pack(side="left")
+        
+
 
         # progress bar
         self.pbar = Progressbar(self, mode='indeterminate')        
@@ -291,16 +301,12 @@ class GUI(Frame):
         self.onGetValue()
 
     def onResetBtn(self):
-        self.ent1.delete(0, END)
-        self.ent2.delete(0, END)
-        self.txt.delete("1.0", END)
-        self.backupBtn.config(state=NORMAL)
-        self.restoreBtn.config(state=DISABLED)
-        self.br.set("backup")
-        self.lbl1.config(text="inputDir:")
+        self.initUI()
 
 
-    # get values from q
+
+    # check for messages on q
+    # process msgs - increment progress bar
     def onGetValue(self):
         # get some timing
         self.checktime = timeit.default_timer()
